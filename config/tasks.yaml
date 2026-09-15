@@ -1,0 +1,62 @@
+# AVGME - Last Asylum: Plague automation config
+#
+# Every coordinate in this bot comes from template matching, never from this file.
+# What lives here is *policy*: what runs, how often, and how human it looks.
+
+adb:
+  # BlueStacks 5: 5555 (enable ADB in Settings > Advanced; it prints the port)
+  # LDPlayer:     5555 (or 5554)
+  # MuMu Player:  7555
+  host: 127.0.0.1
+  port: 5555
+
+  # Lock your emulator to this resolution and never change it. Templates are
+  # captured at one size and matched 1:1; a resize makes every template miss at
+  # once. `avgme doctor` refuses to start on a mismatch.
+  expect_resolution: [1600, 900]
+
+vision:
+  # TM_CCOEFF_NORMED score a match must beat. 0.87 is a good starting point:
+  # high enough to reject lookalike buttons, low enough to survive the game's
+  # idle animations and gradient shifts.
+  default_threshold: 0.87
+
+humanize:
+  # Taps land on a random point inside the middle of the matched box rather than
+  # dead centre. 0.6 = use the central 60% of the box.
+  tap_box_ratio: 0.6
+  # Gaussian delay after each tap, in seconds (mean, stddev), clamped >= 0.15.
+  tap_delay: [0.55, 0.18]
+  # Multiplier spread applied to every configured wait, so intervals never land
+  # on the exact same second twice.
+  interval_jitter: 0.15
+  # Optional on/off cycling so the bot isn't a 24/7 metronome.
+  # Set enabled: false to run continuously.
+  session:
+    enabled: true
+    active_minutes: [35, 50]   # random uniform pick per cycle
+    idle_minutes: [12, 25]
+
+recovery:
+  # How many close-X / Back attempts before giving up on returning to the base
+  # screen and skipping the cycle.
+  max_attempts: 6
+  # Seconds to wait after each dismissal for the UI to settle.
+  settle_seconds: 1.2
+
+tasks:
+  collect:
+    enabled: true
+    # Shelter production regenerates on a timer; every ~8 min is plenty and
+    # keeps tap volume low.
+    interval_seconds: 480
+    # Safety cap on taps per cycle, in case a template matches something that
+    # never disappears.
+    max_taps_per_cycle: 25
+
+  scavenge:
+    enabled: true
+    # Runs are long; checking every 10 min catches completions promptly without
+    # hammering the scavenge menu.
+    interval_seconds: 600
+    max_slots: 6
